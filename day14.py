@@ -541,16 +541,6 @@ def sim(x, y, dx, dy, turns):
     return x, y
 
 
-# m, n = 11, 7
-
-# for line in robots.split('\n'):
-#     x, y, dx, dy = parse_robot(line)
-#     for i in range(1, 1000):
-#         xx, yy = sim(x, y, dx, dy, i)
-#         if xx == x and yy == y:
-#             print('x y period', i)
-#             break
-
 quadrants = [0, 0, 0, 0]
 
 def is_convex(row):
@@ -563,47 +553,43 @@ def is_convex(row):
 
     # print(list(map(lambda X: int(2 * X / m), range(m))))
     # print(list(map(lambda X: int(2 * X / n), range(n))))
-for max8iter in [1, 10 ,100]:
-    kmeans = KMeans(n_clusters=1)
-    import warnings
-    warnings.filterwarnings("ignore")
-    kv = dict()
+
+kmeans = KMeans(n_clusters=1)
+import warnings
+warnings.filterwarnings("ignore")
+kv = dict()
 
 
 
-    for turns in range(1, 10):
-        points = list()
-        for line in robots.split('\n'):
-            x, y, dx, dy = parse_robot(line)
-            x, y = sim(x, y, dx, dy, turns)
-            points.append((x, y))
+for turns in range(xmax * ymax):
+    points = list()
+    for line in robots.split('\n'):
+        x, y, dx, dy = parse_robot(line)
+        x, y = sim(x, y, dx, dy, turns)
+        points.append((x, y))
 
-        kmeans.fit(points)
-        # print(f'{kmeans.inertia_=:.2f}')
-        kv[turns] = kmeans.inertia_
-        print(turns, f'{kmeans.inertia_:.0f}')
-    print()
-#
-#
-#
-# min_kv = min(kv.items(), key=lambda x: x[1])
-# print(min_kv)
-#
-# turns=min_kv[0]
-#
-# g = list()
-# for _ in range(xmax):
-#     g.append([0] * ymax)
-# for line in robots.split('\n'):
-#     x, y, dx, dy = parse_robot(line)
-#     x, y = sim(x, y, dx, dy, turns)
-#     try:
-#         g[x][y] += 1
-#     except IndexError:
-#         pass
-# print(f'{turns=}', sum(map(sum, g)))
-# for row in g:
-#     print(''.join(list(map(lambda x: str(x) if x > 0 else ' ', row))))
+    kmeans.fit(points)
+    # print(f'{kmeans.inertia_=:.2f}')
+    kv[turns] = kmeans.inertia_
+
+min_kv = min(kv.items(), key=lambda x: x[1])
+print(min_kv)
+
+turns=min_kv[0]
+
+g = list()
+for _ in range(xmax):
+    g.append([0] * ymax)
+for line in robots.split('\n'):
+    x, y, dx, dy = parse_robot(line)
+    x, y = sim(x, y, dx, dy, turns)
+    try:
+        g[x][y] += 1
+    except IndexError:
+        pass
+print(f'{turns=}', sum(map(sum, g)))
+for row in g:
+    print(''.join(list(map(lambda x: str(x) if x > 0 else ' ', row))))
 
 
 #
