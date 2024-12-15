@@ -1,14 +1,17 @@
 from itertools import product
 
-LARGE = False
+LARGE = True
 
-map = """#######
-#...#.#
-#.....#
-#..OO@#
-#..O..#
-#.....#
-#######"""
+map = """##########
+#..O..O.O#
+#......O.#
+#.OO..O.O#
+#..O@..O.#
+#O#..O...#
+#O..O..O.#
+#.OO.O.OO#
+#....O...#
+##########"""
 
 if LARGE:
     map = """##################################################
@@ -62,7 +65,16 @@ if LARGE:
 #.O........O..O..#...O.OO...#....#.#.....OO...O.##
 ##################################################"""
 
-moves = """<vv<<^^<<^^"""
+moves = """<vv>^<v^>v>^vv^v>v<>v^v<v<^vv<<<^><<><>>v<vvv<>^v^>^<<<><<v<<<v^vv^v>^
+vvv<<^>^v^^><<>>><>^<<><^vv^^<>vvv<>><^^v>^>vv<>v<<<<v<^v>^<^^>>>^<v<v
+><>vv>v^v^<>><>>>><^^>vv>v<^^^>>v^v^<^^>v^^>v^<^v>v<>>v^v^<v>v^^<^^vv<
+<<v<^>>^^^^>>>v^<>vvv^><v<<<>^^^vv^<vvv>^>v<^^^^v<>^>vvvv><>>v^<<^^^^^
+^><^><>>><>^^<<^^v>>><^<v>^<vv>>v>>>^v><>^v><<<<v>>v<v<v>vvv>^<><<>^><
+^>><>^v<><^vvv<^^<><v<<<<<><^v<<<><<<^^<v<^^^><^>>^<v^><<<^>>^v<v^v<v^
+>^>>^v>vv>^<<^v<>><<><<v<<v><>v<^vv<<<>^^v^>^^>>><<^v>>v^v><^^>>^<>vv^
+<><^^>^^^<><vvvvv^v<v<<>^v<v>v<<^><<><<><<<^^<<<^<<>><<><^^^>^^<>^>v<>
+^^>vv<^v^v<vv>^<><v<^v>^^^>>>^^vvv^>vvv<>>>^<^>>>>>^<<^v>^vvv<>^<><<v>
+v^^>>><<^^<>>^v^<v^vv<>v^<<>^<^v^v><^<<<><<^<v><v<>vv>>v><v^<vv<>v^<<^"""
 
 if LARGE:
     moves = """<><v>^vv<^<v<>^>^^<^^>>^>><vv^>^>^<v<>>^^>>v^>^<v><v><v>>^<^<<^^>^>^<<v^<<^^v><<><v>v^>^^<v<<<>v<>^>^^^><v<><v^<><vv^v>^>^>><^<vv<^>^<^<<<<<^<^vv><v>^v^^><<>>v<v>vvv^<>v<>v><<<v^<^<^vv<^v<>v<<<<<>v<^<<<^<^v^<^>^>>vv>>^^<>^^<^v<^v<<vv<vvv^<^^<>v^^><^^^v^>^>^^<<<^<v<^<><v^<^v^<>>v><^^v^vv><vv>^v>>^vv>v><v<>>>^>>^v>v^^<vv^<v>vv<^<>^>>^v^v><^v^>>^>^<<<<<><v<v<vvv><><^^v^^^<>v<>vv>v^>>>^<>>^^^><v<^<>v<^>^<vvv^>^>vvv>>v<>v<>v<><><<^vv>^<^<<>^^<v<^^>v^v<v<>>^^><>^>>>^v^<>^^^<>><v><>v><>v>^<>vvv>>><><v<><>v^vv^>v^^>>v<^<^<v^>>>^^>>v<<<v^vvvv>^^v>^v<^>^vv^v^v<^^>v>^vv<<v^^^v^<v<^v^<v><v>^^v<^^><^^<^vvv<v<<><>v^<>><<<^vv<^^<<>^^<^<^>^<><v><^>v>><><v^vv<<>>^^>vvv^><<^v<<^>^<^<<><^<>^<>vv>><v>^^<v<v>v^v^^<<>^>>^^v>>v>^^>^<><^>v<vvv>^>v<><vv<><^v>>^<^^<<<<<>^vv<<<v>^<><^<v>v^<v<v<v^<v^<>^v<vv^vv>v^^>v^>^^<v^<<v>^^v>v><<<<<^vv><v>>v><^^^v<^^vvv^^>^^^>vv<>v^<>><><<><^>^^^v^<v>>>v<>vv>vvvv^>>v<<<^vv>>>^v^v><<^vvv^<<>v<><^v><>^v>>v>^^<<>v^vvv><^^<>>^<<<<>>^>>v^^<>>>>vv>v<v^>^<^v>v>>^^>v^^v<^vv><^<^^<vv
@@ -115,34 +127,87 @@ dir = {'<': (0, -1),
        'v': (1, 0)}
 
 def show_grid():
+    return
     print(move)
-    # return
     for row in g:
         print(''.join(row))
     print()
 
+def push_possible(x, y, move):
+    dx, dy = dir[move]
+    if g[x + dx][y + dy] == '.':
+        return True
+    if g[x + dx][y + dy] == '#':
+        return False
+    if g[x + dx][y + dy] == '[':
+        if move in '<>':
+            return push_possible(x + dx, y + dy, move)
+        else:
+            return push_possible(x + dx, y + dy, move) and push_possible(x + dx, y + 1 + dy, move)
+    if g[x + dx][y + dy] == ']':
+        if move in '<>':
+            return push_possible(x + dx, y + dy, move)
+        else:
+            return push_possible(x + dx, y + dy, move) and push_possible(x + dx, y - 1 + dy, move)
+    assert False
+
+def push(x, y, move):
+    dx, dy = dir[move]
+    if g[x + dx][y + dy] == '.':
+        g[x][y], g[x + dx][y + dy] = g[x + dx][y + dy], g[x][y]
+        return
+    if g[x + dx][y + dy] == '[':
+        if move in '<>':
+            push(x + dx, y + dy, move)
+            g[x][y], g[x + dx][y + dy] = g[x + dx][y + dy], g[x][y]
+            return
+        else:
+            push(x + dx, y + dy, move)
+            push(x + dx, y + 1 + dy, move)
+            g[x][y], g[x + dx][y + dy] = g[x + dx][y + dy], g[x][y]
+            return
+    if g[x + dx][y + dy] == ']':
+        if move in '<>':
+            push(x + dx, y + dy, move)
+            g[x][y], g[x + dx][y + dy] = g[x + dx][y + dy], g[x][y]
+            return
+        else:
+            push(x + dx, y + dy, move)
+            push(x + dx, y - 1 + dy, move)
+            g[x][y], g[x + dx][y + dy] = g[x + dx][y + dy], g[x][y]
+            return
+
+
 for move in moves:
     show_grid()
-    di, dj = dir[move]
-    ahead = list()
-    i, j = x, y
-    while True:
-        i += di
-        j += dj
-        if g[i][j] == '#':
-            break
-        ahead.append(g[i][j])
-    if not '.' in ahead:
-        continue
-    k = ahead.index('.') + 1
-    i, j = x, y
-    while k > 1:
-        g[i + di * k][j + dj * k] = ahead[k - 2]
-        k -= 1
-    g[i + di][j + dj] = '@'
-    g[i][j] = '.'
-    x += di
-    y += dj
+    assert g[x][y] == '@'
+    dx, dy = dir[move]
+    can_push = push_possible(x, y, move)
+    print(f'{can_push=}')
+    if can_push:
+        push(x, y, move)
+        x += dx
+        y += dy
+    # ahead = list()
+    # i, j = x, y
+    # while True:
+    #     i += di
+    #     j += dj
+    #     if g[i][j] == '#':
+    #         break
+    #     ahead.append(g[i][j])
+    # if not '.' in ahead:
+    #     continue
+    # k = ahead.index('.') + 1
+    # i, j = x, y
+    # while k > 1:
+    #     g[i + di * k][j + dj * k] = ahead[k - 2]
+    #     k -= 1
+    # g[i + di][j + dj] = '@'
+    # g[i][j] = '.'
+    # x += di
+    # y += dj
+show_grid()
 
 n = len(g)
 assert len(g[0]) == 2 * n
