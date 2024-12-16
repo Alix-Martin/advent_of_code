@@ -214,10 +214,10 @@ def neighbors(state):
     return r
 
 def distance(start, goal):
-    seen = {(start, '>')}
-    frontier = {(start, '>')}
+    seen = {start}
+    frontier =  {start}
     progress = True
-    cost = {(start, '>'): 0}
+    cost = {start: 0}
     while progress:
         progress = False
         new_frontier = set()
@@ -232,7 +232,20 @@ def distance(start, goal):
                 seen.add(n)
         frontier = new_frontier
 
-    r = (min([cost[goal, d] for d in '<>^v']))
-    return r
+    r = (min([cost[(goal, d)] for d in '<>^v']))
+    return r, cost
 
-print(distance(start, goal))
+path = set()
+
+dist, cost_from_start = distance((start, '>'), goal)
+for  d in '<>^v':
+    dist2, cost_from_goal = distance((goal, d), start)
+
+    for k, v in cost_from_start.items():
+        pos, dir = k
+        sum_costs = v + cost_from_goal[(pos, opposite[dir])]
+        assert sum_costs >= dist
+        if sum_costs == dist:
+            path.add(pos)
+
+print(len(path))
