@@ -3485,18 +3485,10 @@ if LARGE:
 for _ in range(n):
     g.append(['.'] * n)
 
-for byte in bytes[:1024]:
-    x, y = byte.split(',')
-    x, y = int(x), int(y)
-    g[y][x] = '#'
 
 # for row in g:
 #     print(''.join(row))
 
-frontier = {(0, 0)}
-seen = {(0, 0)}
-progress = True
-t = 0
 from itertools import product
 
 def neighbors(nn):
@@ -3509,17 +3501,31 @@ def neighbors(nn):
             r.add((x + dx, y + dy))
     return r
 
-while progress:
-    if (n - 1, n - 1) in seen:
-        print(t)
+def traversable(g):
+    frontier = {(0, 0)}
+    seen = {(0, 0)}
+    progress = True
+    while progress:
+        if (n - 1, n - 1) in seen:
+            return True
+        progress = False
+        new_frontier = set()
+        for p in frontier:
+            for neighbor in neighbors(p):
+                if neighbor not in seen:
+                    progress = True
+                    new_frontier.add(neighbor)
+                    seen.add(neighbor)
+        frontier = new_frontier
+    return False
+
+print(f'{len(bytes)=}')
+
+for i, byte in enumerate(bytes):
+    print(i + 1)
+    x, y = byte.split(',')
+    x, y = int(x), int(y)
+    g[y][x] = '#'
+    if not traversable(g):
+        print(x, y)
         break
-    t += 1
-    progress = False
-    new_frontier = set()
-    for p in frontier:
-        for neighbor in neighbors(p):
-            if neighbor not in seen:
-                progress = True
-                new_frontier.add(neighbor)
-                seen.add(neighbor)
-    frontier = new_frontier
